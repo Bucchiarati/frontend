@@ -1,27 +1,22 @@
 <template>
   <div>
-    <Home>
+    <LoginForm>
       <template #navigation>
         <Navigation />
       </template>
-    </Home>
+    </LoginForm>
   </div>
 </template>
 
 <script>
-import { defineComponent } from 'vue';
-
-// Components
-import Home from '../components/Home.vue';
+import LoginForm from '../components/LoginForm.vue';
 import Navigation from '../components/Navigation.vue';
 
-
-export default defineComponent({
-  name: 'HomeView',
-
+export default {
+  name: 'LoginView',
   components: {
-    Home,
+    LoginForm,
     Navigation
-  },
-});
+  }
+};
 </script>

@@ -1,11 +1,32 @@
 import { createRouter, createWebHistory } from 'vue-router'
 import HomeView from '../views/HomeView.vue'
+import LoginForm from '../components/LoginForm.vue'
+import LoginView from '../views/LoginView.vue'
+import Navigation from '../components/Navigation.vue'
+import HelloWorld from '../components/HelloWorld.vue'
+import ReservacionesView from '../views/ReservacionesView.vue'
 
 const routes = [
   {
-    path: '/',
+    path: '/home',
     name: 'home',
-    component: HomeView
+    components: {
+      default: HomeView,
+    }
+  },
+  {
+    path: '/login',
+    name: 'login',
+    components: {
+      default: LoginView,
+    }
+  },
+  {
+    path: '/reservation',
+    name: 'reservation',
+    components: {
+      default: ReservacionesView,
+    }
   },
   {
     path: '/about',

@@ -1,27 +1,22 @@
 <template>
   <div>
-    <Home>
+    <ReservacionesForm>
       <template #navigation>
         <Navigation />
       </template>
-    </Home>
+    </ReservacionesForm>
   </div>
 </template>
 
 <script>
-import { defineComponent } from 'vue';
-
-// Components
-import Home from '../components/Home.vue';
+import ReservacionesForm from '../components/ReservacionesForm.vue';
 import Navigation from '../components/Navigation.vue';
 
-
-export default defineComponent({
-  name: 'HomeView',
-
+export default {
+  name: 'ReservacionesView',
   components: {
-    Home,
+    ReservacionesForm,
     Navigation
-  },
-});
+  }
+};
 </script>
