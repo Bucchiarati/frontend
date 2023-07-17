@@ -1,74 +1,75 @@
 const express = require('express');
+const bodyParser = require('body-parser');
+const cors = require('cors');
 const { Pool } = require('pg');
 const bcrypt = require('bcrypt');
-const jwt = require('jsonwebtoken');
+const { default: migrate } = require('node-pg-migrate');
+
 
 const app = express();
-const PORT = 3000;
+const port = 3000;
 
-// Configuración de la conexión a la base de datos PostgreSQL
+// Configura el middleware para analizar las solicitudes JSON
+app.use(bodyParser.json());
+
+// Configura el middleware para permitir solicitudes de origen cruzado
+app.use(cors());
+
+// Configura la conexión a la base de datos PostgreSQL
 const pool = new Pool({
   user: 'postgres',
   host: 'localhost',
-  database: 'postgres',
+  database: 'db_glab',
   password: 'admin',
-  port: 5432
+  port: 5432,
 });
 
-// Middleware para analizar el cuerpo de las solicitudes como JSON
-app.use(express.json());
+migrate({
+  schema: 'public',
+  direction: 'up',
+  log: () => {}, // Opcional: puedes proporcionar una función de registro personalizada
+  noLock: true, // Opcional: deshabilita el bloqueo de migraciones para evitar conflictos en entornos compartidos
+  pool,
+  migrationsTable: 'migrations', // Opcional: especifica el nombre de la tabla de migraciones
+})
+  .then(() => {
+    // Inicia el servidor Express
+    app.listen(port, () => {
+      console.log(`Servidor backend iniciado en http://localhost:${port}`);
+    });
+  })
+  .catch((error) => {
+    console.error('Error al ejecutar las migraciones:', error);
+  });
 
-// Ruta de registro de usuario
-app.post('/api/register', async (req, res) => {
-  try {
-    const { email, password } = req.body;
-
-    // Verificar si el usuario ya existe en la base de datos
-    const existingUser = await pool.query('SELECT * FROM users WHERE email = $1', [email]);
-    if (existingUser.rows.length > 0) {
-      return res.status(400).json({ message: 'El usuario ya existe' });
-    }
-
-    // Encriptar la contraseña
-    const salt = await bcrypt.genSalt(10);
-    const hashedPassword = await bcrypt.hash(password, salt);
-
-    // Insertar el nuevo usuario en la base de datos
-    await pool.query('INSERT INTO users (email, password) VALUES ($1, $2)', [email, hashedPassword]);
-
-    res.status(201).json({ message: 'Usuario registrado exitosamente' });
-  } catch (error) {
-    res.status(500).json({ error: 'Error al registrar el usuario' });
-  }
-});
-
-// Ruta de inicio de sesión
+// Ruta para el inicio de sesión
 app.post('/api/login', async (req, res) => {
   try {
     const { email, password } = req.body;
 
-    // Obtener el usuario de la base de datos
-    const user = await pool.query('SELECT * FROM users WHERE email = $1', [email]);
-    if (user.rows.length === 0) {
-      return res.status(401).json({ message: 'Credenciales inválidas' });
+    // Verifica si el correo electrónico existe en la base de datos
+    const query = 'SELECT * FROM usuarios WHERE email = $1';
+    const result = await pool.query(query, [email]);
+
+    if (result.rows.length === 0) {
+      return res.status(401).json({ message: 'Correo electrónico o contraseña incorrectos' });
     }
 
-    // Verificar la contraseña
-    const validPassword = await bcrypt.compare(password, user.rows[0].password);
-    if (!validPassword) {
-      return res.status(401).json({ message: 'Credenciales inválidas' });
+    // Compara la contraseña ingresada con la contraseña almacenada en la base de datos
+    const user = result.rows[0];
+    const match = await bcrypt.compare(password, user.password);
+
+    if (!match) {
+      return res.status(401).json({ message: 'Correo electrónico o contraseña incorrectos' });
     }
 
-    // Generar un token de acceso
-    const token = jwt.sign({ userId: user.rows[0].id }, 'secret_key');
+    // Genera un token de sesión o realiza otras acciones según tus necesidades
+    const token = 'tu_token_de_sesion';
 
-    res.status(200).json({ token });
+    // Devuelve el token en la respuesta
+    return res.status(200).json({ token });
   } catch (error) {
-    res.status(500).json({ error: 'Error al iniciar sesión' });
+    console.error('Error al iniciar sesión:', error);
+    return res.status(500).json({ message: 'Error al iniciar sesión' });
   }
-});
-
-// Iniciar el servidor
-app.listen(PORT, () => {
-  console.log(`Servidor en ejecución en http://localhost:${PORT}`);
 });

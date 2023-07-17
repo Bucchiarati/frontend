@@ -18,32 +18,35 @@
   </v-container>
 </template>
   
-  <script>
-  import axios from 'axios';
-  
-  export default {
-    data() {
-      return {
-        email: '',
-        password: ''
-      };
-    },
-    methods: {
-      login() {
-        axios.post('/api/login', { email: this.email, password: this.password })
-          .then(response => {
-            const token = response.data.token;
-            // Almacenar el token en el almacenamiento local o en una cookie, según tus necesidades.
-            console.log('Token:', token);
-            // Redireccionar al usuario a otra página o realizar otras acciones según tus necesidades.
-          })
-          .catch(error => {
-            console.error('Error al iniciar sesión:', error.response.data.message);
-          });
-      }
+<script>
+import axios from 'axios';
+
+export default {
+  data() {
+    return {
+      email: '',
+      password: ''
+    };
+  },
+  methods: {
+    login() {
+      axios.post('http://localhost:3000/api/login', {
+        email: this.email,
+        password: this.password
+      })
+      .then(response => {
+        // Aquí puedes realizar acciones adicionales, como guardar el token en el almacenamiento local
+        console.log('Inicio de sesión exitoso');
+        // Redirigir al usuario a otra página
+        this.$router.push('/admin');
+      })
+      .catch(error => {
+        console.error('Error al iniciar sesión:', error.response.data.message);
+      });
     }
-  };
-  </script>
+  }
+};
+</script>
 
 <style scoped>
 .fill-height {
