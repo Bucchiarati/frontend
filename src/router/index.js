@@ -1,10 +1,8 @@
 import { createRouter, createWebHistory } from 'vue-router'
 import HomeView from '../views/HomeView.vue'
-import LoginForm from '../components/LoginForm.vue'
 import LoginView from '../views/LoginView.vue'
-import Navigation from '../components/Navigation.vue'
-import HelloWorld from '../components/HelloWorld.vue'
 import ReservacionesView from '../views/ReservacionesView.vue'
+import HomeAdminView from '../views/HomeAdminView.vue'
 
 const routes = [
   {
@@ -12,6 +10,13 @@ const routes = [
     name: 'home',
     components: {
       default: HomeView,
+    }
+  },
+  {
+    path: '/admin',
+    name: 'admin',
+    components: {
+      default: HomeAdminView,
     }
   },
   {

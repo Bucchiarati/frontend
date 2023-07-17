@@ -2,16 +2,48 @@
   <slot name="navigation"></slot>
   <v-card title="Haz tu reservación" class="form">
     <v-form @submit.prevent="submitForm">
-      <v-text-field v-model="nombres" :rules="nameRules" label="Nombres" required></v-text-field>
-      <v-text-field v-model="apellidos" :rules="surnameRules" label="Apellidos" required></v-text-field>
-      <v-select v-model="tipoDocumento" :items="tiposDocumento" label="Tipo de documento" required></v-select>
-      <v-text-field v-model="identificacion" :rules="idRules" label="Identificación" required></v-text-field>
-      <v-text-field v-model="email" :rules="mailRules" label="Email" required></v-text-field>
-      <v-date-picker v-model="fechaReserva" label="Fecha de reserva" required></v-date-picker>
-      <v-select v-model="tipoReserva" :items="tiposReserva" label="Tipo de reserva" required></v-select>
-      <v-text-field v-model="cantidadPersonas" :rules="peopleRules" label="Cantidad de personas" type="number" required></v-text-field>
-      <v-textarea v-model="observaciones" label="Descripción y/o observaciones"></v-textarea>
-      <v-btn type="submit" color="secondary">Realizar reserva</v-btn>
+      <v-container>
+        <v-row>
+          <v-col cols="12" sm="6">
+            <v-text-field v-model="nombres" :rules="nameRules" label="Nombres" required></v-text-field>
+          </v-col>
+          <v-col cols="12" sm="6">
+            <v-text-field v-model="apellidos" :rules="surnameRules" label="Apellidos" required></v-text-field>
+          </v-col>
+        </v-row>
+
+        <v-row>
+          <v-col cols="12" sm="6">
+            <v-select v-model="tipoDocumento" :items="tiposDocumento" label="Tipo de documento" required></v-select>
+          </v-col>
+          <v-col cols="12" sm="6">
+            <v-text-field v-model="identificacion" :rules="idRules" label="Identificación" required></v-text-field>
+          </v-col>
+        </v-row>
+
+        <v-row>
+          <v-col cols="12" sm="6">
+            <v-text-field v-model="email" :rules="mailRules" label="Email" required></v-text-field>
+          </v-col>
+          <v-col cols="12" sm="6">
+            <v-text-field v-model="fechaReserva" :rules="dateRules" label="Fecha de reserva" type="date" required></v-text-field>
+          </v-col>
+        </v-row>
+
+        <v-row>
+          <v-col cols="12" sm="6">
+            <v-select v-model="tipoReserva" :items="tiposReserva" label="Tipo de reserva" required></v-select>
+          </v-col>
+          <v-col cols="12" sm="6">
+            <v-text-field v-model="cantidadPersonas" :rules="peopleRules" label="Cantidad de personas" type="number" required></v-text-field>
+          </v-col>
+        </v-row>
+
+        <v-textarea v-model="observaciones" label="Descripción y/o observaciones"></v-textarea>
+
+        <v-btn type="submit" color="secondary">Realizar reserva</v-btn>
+
+      </v-container>
     </v-form>
   </v-card>
 </template>
@@ -46,7 +78,11 @@ export default {
         v => !!v || 'El email es requerido',
         v => /.+@.+\..+/.test(v) || 'El email debe ser válido'
       ],
-      fechaReserva: null,
+      fechaReserva: '',
+      dateRules: [
+        v => !!v || 'La fecha de reserva es requerida',
+        v => (v >= new Date().toISOString().substr(0, 10)) || 'La fecha de reserva debe ser mayor o igual a la fecha actual'
+      ],
       tipoReserva: '',
       tiposReserva: ['Cena', 'Almuerzo', 'Onces', 'Cumpleaños', 'Ocasión Especial'],
       cantidadPersonas: null,
@@ -79,4 +115,5 @@ export default {
 .v-btn {
   margin: 20px;
 }
+
 </style>
