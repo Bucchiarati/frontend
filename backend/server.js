@@ -7,6 +7,19 @@ const jwt = require('jsonwebtoken');
 
 
 const createTables = async () => {
+
+  const usersQuery = `CREATE TABLE IF NOT EXISTS users (
+    id SERIAL PRIMARY KEY,
+    name VARCHAR(255) NOT NULL,
+    email VARCHAR(255) NOT NULL,
+    rol VARCHAR(255) NOT NULL,
+    email_verified_at TIMESTAMP,
+    password VARCHAR(255) NOT NULL,
+    remember_token VARCHAR(255),
+    created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    updated_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP
+  );`;
+
   const rolesQuery = `CREATE TABLE IF NOT EXISTS roles (
     id SERIAL PRIMARY KEY,
     name VARCHAR(255) NOT NULL,
@@ -32,7 +45,9 @@ const createTables = async () => {
       updated_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP
     );
   `;
+
   try{
+    await pool.query(usersQuery);
     await pool.query(rolesQuery);
     await pool.query(reservacionesQuery);
     console.log('Tablas creadas correctamente');
@@ -128,10 +143,10 @@ app.use(cors());
 // Configuracion de la conexión a la base de datos PostgreSQL
 const pool = new Pool({
   user: 'postgres',
-  host: 'localhost',
-  database: 'db_glab',
-  password: 'admin',
-  port: 5432,
+  host: 'containers-us-west-177.railway.app',
+  database: 'railway',
+  password: 'Dxpe7Hi6KEK36jQ47B2v',
+  port: 6361,
 });
 
 initializeDatabase();
