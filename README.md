@@ -10,6 +10,11 @@ npm install
 npm run serve
 ```
 
+## backend
+
+```
+go to backend folder and run: node server.js
+```
 ### Compiles and minifies for production
 ```
 npm run build
