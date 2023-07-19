@@ -3,7 +3,7 @@
   "version": "0.1.0",
   "private": true,
   "scripts": {
-    "start": "npm run serve",
+    "start": "npm run serve --omit=dev",
     "server": "node ./backend/server.js",
 
     "serve": "vue-cli-service serve",
