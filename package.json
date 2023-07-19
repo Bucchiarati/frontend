@@ -3,12 +3,12 @@
   "version": "0.1.0",
   "private": true,
   "scripts": {
-    "start": "npm run serve --omit=dev",
+    "start": "npm run serve",
     "server": "node ./backend/server.js",
-
     "serve": "vue-cli-service serve",
     "build": "vue-cli-service build"
   },
+  
   "dependencies": {
     "@mdi/font": "5.9.55",
     "axios": "^1.4.0",

@@ -143,10 +143,10 @@ app.use(cors());
 // Configuracion de la conexión a la base de datos PostgreSQL
 const pool = new Pool({
   user: 'postgres',
-  host: 'containers-us-west-177.railway.app',
-  database: 'railway',
-  password: 'Dxpe7Hi6KEK36jQ47B2v',
-  port: 6361,
+  host: 'localhost',
+  database: 'db_glab',
+  password: 'admin',
+  port: 5432,
 });
 
 initializeDatabase();
