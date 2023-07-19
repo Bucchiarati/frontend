@@ -146,7 +146,7 @@ app.post('/api/login', async (req, res) => {
     const result = await pool.query(query, [email]);
 
     if (result.rows.length === 0) {
-      return res.status(401).json({ message: 'Correo electrónico o contraseña incorrectos' });
+      return res.status(401).json({ message: 'Correo electrónico no existe'});
     }
 
     // Compara la contraseña ingresada con la contraseña almacenada en la base de datos
@@ -155,7 +155,7 @@ app.post('/api/login', async (req, res) => {
     const match = await bcrypt.compare(password, user.password);
 
     if (!match) {
-      return res.status(401).json({ message: 'Contraseña incorrecta' });
+      return res.status(401).json({ message: 'Contraseña incorrecta'});
     }
 
     // Verifica si el ID del usuario está en la tabla de roles
@@ -163,7 +163,7 @@ app.post('/api/login', async (req, res) => {
     const result2 = await pool.query(query2, [user.id]);
 
     if (result2.rows.length === 0) {
-      return res.status(401).json({ message: 'No estás autorizado como administrador' });
+      return res.status(401).json({ message: 'El usuario no tiene el rol de administrador'});
     }
 
     // Crea un token JWT
@@ -175,8 +175,7 @@ app.post('/api/login', async (req, res) => {
     return res.status(200).json({ token });
   } catch (error) {
     console.error('Error al iniciar sesión:', error);
-    alert('Error al iniciar sesión');
-    return res.status(500).json({ message: 'Error al iniciar sesión', error });
+    return res.status(500).json({ message: 'Error al iniciar sesión', errorCode: 500, error });
   }
 });
 

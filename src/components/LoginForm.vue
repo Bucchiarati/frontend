@@ -22,7 +22,6 @@
 import axios from 'axios';
 
 export default {
-
   name: 'LoginForm',
   data() {
     return {
@@ -32,20 +31,19 @@ export default {
   },
   methods: {
     login() {
-    const response = axios.post('http://localhost:3000/api/login', {
-    email: this.email,
-    password: this.password
-  })
-  .then(response => {
-    localStorage.setItem('token', response.data.token);
-    this.$router.push('/admin');
-  })
-  .catch(error => {
-    alert('Error al iniciar sesión', error)
-  });
-
-    
-}
+      axios.post('http://localhost:3000/api/login', {
+        email: this.email,
+        password: this.password
+      })
+        .then(response => {
+          localStorage.setItem('token', response.data.token);
+          alert('Bienvenido');
+          this.$router.push('/admin');
+        })
+        .catch(error => {
+          alert(`Error al iniciar sesión: ${error.response.data.message}`);
+        });
+    }
   }
 };
 </script>
