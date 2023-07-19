@@ -6,31 +6,8 @@ const bcrypt = require('bcrypt');
 const jwt = require('jsonwebtoken');
 
 
-//Funcion para crear el usuario admin
-function createUser() {
-  const user = {
-    name: 'Admin',
-    email: 'admin@mail.com',
-    rol: 'admin',
-    email_verified_at: new Date().toISOString(),
-    password: bcrypt.hashSync('admin', 10),
-    remember_token: 'admin'
-  };
-
-  const query = 'INSERT INTO users (name, email, rol, email_verified_at, password, remember_token) VALUES ($1, $2, $3, $4, $5, $6)';
-  const values = [user.name, user.email, user.rol, user.email_verified_at, user.password, user.remember_token];
-
-  pool.query(query, values, (error, result) => {
-    if (error) {
-      console.error('Error al crear el usuario:', error);
-      return;
-    }
-    console.log('Usuario creado correctamente');
-  });
-}
-
-function createTables() {
-  const rolesQuery = `CREATE TABLE roles (
+const createTables = async () => {
+  const rolesQuery = `CREATE TABLE IF NOT EXISTS roles (
     id SERIAL PRIMARY KEY,
     name VARCHAR(255) NOT NULL,
     user_id INTEGER REFERENCES users(id),
@@ -39,7 +16,7 @@ function createTables() {
   );`;
 
   const reservacionesQuery = `
-    CREATE TABLE reservaciones (
+    CREATE TABLE IF NOT EXISTS reservaciones (
       id SERIAL PRIMARY KEY,
       nombres VARCHAR(255) NOT NULL,
       apellidos VARCHAR(255) NOT NULL,
@@ -55,39 +32,88 @@ function createTables() {
       updated_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP
     );
   `;
+  try{
+    await pool.query(rolesQuery);
+    await pool.query(reservacionesQuery);
+    console.log('Tablas creadas correctamente');
+  } catch (error) {
+    console.error('Error al crear las tablas:', error);
+  }
+};
 
-  pool.query(rolesQuery, (error, result) => {
-    if (error) {
-      console.error('Error al crear la tabla de Roles:', error);
+  const createUser = async () => {
+    const checkUserQuery = `
+    SELECT id FROM users WHERE email = 'admin@mail.com' LIMIT 1;
+    `;
+    const checkUserResult = await pool.query(checkUserQuery);
+
+    if (checkUserResult.rows.length > 0) {
+      console.log('El usuario admin ya existe');
       return;
     }
-    console.log('Tabla de Roles creada correctamente');
-    pool.query(reservacionesQuery, (error, result) => {
-      if (error) {
-        console.error('Error al crear la tabla de Reservaciones:', error);
-        return;
-      }
-      console.log('Tabla de Reservaciones creada correctamente');
-      createUser();
-    });
-  });
-}
 
-function assignAdminRole() {
-  const query = `
-    INSERT INTO roles (name, user_id)
-    SELECT $1, users.id FROM users WHERE users.email = $2;
+    const user = {
+      name: 'Admin',
+      email: 'admin@mail.com',
+      rol: 'admin',
+      email_verified_at: new Date().toISOString(),
+      password: bcrypt.hashSync('admin', 10),
+      remember_token: 'admin'
+    };
+
+    const query = `
+    INSERT INTO users (name, email, rol, email_verified_at, password, remember_token)
+    VALUES ($1, $2, $3, $4, $5, $6)
   `;
-  const values = ['admin', 'admin@mail.com'];
 
-  pool.query(query, values, (error, result) => {
-    if (error) {
-      console.error('Error al asignar el rol de admin:', error);
+  const values = [user.name, user.email, user.rol, user.email_verified_at, user.password, user.remember_token];
+
+  try {
+    await pool.query(query, values);
+    console.log('Usuario creado correctamente');
+  }
+  catch (error) {
+    console.error('Error al crear el usuario:', error);
+  }
+  };
+  const assignAdminRole = async () => {
+    const checkRoleQuery = `
+      SELECT id
+      FROM roles
+      WHERE user_id = (
+        SELECT id
+        FROM users
+        WHERE email = 'admin@mail.com'
+        LIMIT 1
+      )
+      LIMIT 1
+    `;
+    const checkRoleResult = await pool.query(checkRoleQuery);
+  
+    if (checkRoleResult.rows.length > 0) {
+      console.log('El rol de admin ya ha sido asignado al usuario administrador');
       return;
     }
-    console.log('Rol de admin asignado correctamente');
-  });
-}
+  
+    const query = `
+      INSERT INTO roles (name, user_id)
+      SELECT $1, users.id FROM users WHERE users.email = $2;
+    `;
+    const values = ['admin', 'admin@mail.com'];
+  
+    try {
+      await pool.query(query, values);
+      console.log('Rol de admin asignado correctamente');
+    } catch (error) {
+      console.error('Error al asignar el rol de admin:', error);
+    }
+  };
+
+const initializeDatabase = async () => {
+  await createTables();
+  await createUser();
+  await assignAdminRole();
+};
 
 
 const app = express();
@@ -108,9 +134,7 @@ const pool = new Pool({
   port: 5432,
 });
 
-createTables();
-assignAdminRole();
-
+initializeDatabase();
 
 // Ruta para el inicio de sesión
 app.post('/api/login', async (req, res) => {
@@ -123,7 +147,6 @@ app.post('/api/login', async (req, res) => {
 
     if (result.rows.length === 0) {
       return res.status(401).json({ message: 'Correo electrónico o contraseña incorrectos' });
-      alert('Correo electrónico o contraseña incorrectos');
     }
 
     // Compara la contraseña ingresada con la contraseña almacenada en la base de datos
@@ -132,22 +155,24 @@ app.post('/api/login', async (req, res) => {
     const match = await bcrypt.compare(password, user.password);
 
     if (!match) {
-      return res.status(401).json({ message: 'Correo electrónico o contraseña incorrectos' });
-      alert('Correo electrónico o contraseña incorrectos');
+      return res.status(401).json({ message: 'Contraseña incorrecta' });
     }
 
-    //crea un token jwt
+    // Verifica si el ID del usuario está en la tabla de roles
+    const query2 = 'SELECT * FROM roles WHERE user_id = $1';
+    const result2 = await pool.query(query2, [user.id]);
 
+    if (result2.rows.length === 0) {
+      return res.status(401).json({ message: 'No estás autorizado como administrador' });
+    }
+
+    // Crea un token JWT
     const payload = { user: { id: user.id, name: user.name, email: user.email, rol: user.rol } };
-
     const key = 'secret';
-
     const token = jwt.sign(payload, key, { expiresIn: '1h' });
 
     // Devuelve el token en la respuesta
     return res.status(200).json({ token });
-    alert('Inicio de sesión exitoso');
-
   } catch (error) {
     console.error('Error al iniciar sesión:', error);
     alert('Error al iniciar sesión');

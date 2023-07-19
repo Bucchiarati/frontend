@@ -15,7 +15,7 @@ const routes = [
     path: '/admin',
     name: 'admin',
     component: HomeAdminView,
-    meta: { requiresAuth: true } // Agrega meta para indicar que la ruta requiere autenticación
+    meta: { requiresAuth: true }
   },
   {
     path: '/login',
@@ -31,11 +31,6 @@ const routes = [
     path: '/reservation',
     name: 'reservation',
     component: ReservacionesView
-  },
-  {
-    path: '/about',
-    name: 'about',
-    component: () => import(/* webpackChunkName: "about" */ '../views/AboutView.vue')
   }
 ]
 
