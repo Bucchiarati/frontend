@@ -164,6 +164,7 @@ export default {
         axios.put(`http://localhost:3000/api/reservaciones/${updatedReservation.id}`, updatedReservation)
           .then(response => {
             console.log('Reserva actualizada:', response.data.reservacion);
+            alert('Reserva actualizada');
           })
           .catch(error => {
             console.error('Error al actualizar la reserva:', error);
@@ -192,6 +193,8 @@ export default {
         axios.put(`http://localhost:3000/api/reservaciones/${updatedReservation.id}`, updatedReservation)
           .then(response => {
             console.log('Reserva actualizada:', response.data.reservacion);
+            alert('Reserva confirmada');
+            window.location.reload();
           })
           .catch(error => {
             console.error('Error al actualizar la reserva:', error);
