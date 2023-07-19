@@ -4,6 +4,8 @@ import LoginView from '../views/LoginView.vue'
 import ReservacionesView from '../views/ReservacionesView.vue'
 import HomeAdminView from '../views/HomeAdminView.vue'
 
+
+
 const routes = [
   {
     path: '/home',

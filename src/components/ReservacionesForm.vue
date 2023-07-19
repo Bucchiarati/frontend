@@ -14,7 +14,7 @@
 
         <v-row>
           <v-col cols="12" sm="6">
-            <v-select v-model="tipoDocumento" :items="tiposDocumento" label="Tipo de documento" required></v-select>
+            <v-select v-model="tipodocumento" :items="tiposDocumento" label="Tipo de documento" required></v-select>
           </v-col>
           <v-col cols="12" sm="6">
             <v-text-field v-model="identificacion" :rules="idRules" label="Identificación" required></v-text-field>
@@ -26,16 +26,16 @@
             <v-text-field v-model="email" :rules="mailRules" label="Email" required></v-text-field>
           </v-col>
           <v-col cols="12" sm="6">
-            <v-text-field v-model="fechaReserva" :rules="dateRules" label="Fecha de reserva" type="date" required></v-text-field>
+            <v-text-field v-model="fechareserva" :rules="dateRules" label="Fecha de reserva" type="date" required></v-text-field>
           </v-col>
         </v-row>
 
         <v-row>
           <v-col cols="12" sm="6">
-            <v-select v-model="tipoReserva" :items="tiposReserva" label="Tipo de reserva" required></v-select>
+            <v-select v-model="tiporeserva" :items="tiposReserva" label="Tipo de reserva" required></v-select>
           </v-col>
           <v-col cols="12" sm="6">
-            <v-text-field v-model="cantidadPersonas" :rules="peopleRules" label="Cantidad de personas" type="number" required></v-text-field>
+            <v-text-field v-model="cantidadpersonas" :rules="peopleRules" label="Cantidad de personas" type="number" required></v-text-field>
           </v-col>
         </v-row>
 
@@ -49,6 +49,8 @@
 </template>
 
 <script>
+import axios from 'axios';
+
 export default {
   name: 'ReservacionForm',
   data() {
@@ -65,7 +67,7 @@ export default {
         v => (v && v.length <= 15) || 'El apellido debe tener menos de 15 caracteres',
         v => /^[a-zA-Z]+$/.test(v) || 'El apellido solo puede contener letras'
       ],
-      tipoDocumento: '',
+      tipodocumento: '',
       tiposDocumento: ['Cédula', 'Pasaporte', 'Tarjeta de Identidad'],
       identificacion: '',
       idRules: [
@@ -78,14 +80,14 @@ export default {
         v => !!v || 'El email es requerido',
         v => /.+@.+\..+/.test(v) || 'El email debe ser válido'
       ],
-      fechaReserva: '',
+      fechareserva: '',
       dateRules: [
         v => !!v || 'La fecha de reserva es requerida',
         v => (v >= new Date().toISOString().substr(0, 10)) || 'La fecha de reserva debe ser mayor o igual a la fecha actual'
       ],
-      tipoReserva: '',
+      tiporeserva: '',
       tiposReserva: ['Cena', 'Almuerzo', 'Onces', 'Cumpleaños', 'Ocasión Especial'],
-      cantidadPersonas: null,
+      cantidadpersonas: null,
       peopleRules: [
         v => !!v || 'La cantidad de personas es requerida',
         v => (v > 0) || 'La cantidad de personas debe ser mayor a 0',
@@ -96,9 +98,31 @@ export default {
   },
   methods: {
     submitForm() {
-      // Lógica para enviar los datos del formulario
-      console.log('Formulario enviado');
-    }
+  // Crea un objeto con los datos del formulario
+  const formData = {
+    nombres: this.nombres,
+    apellidos: this.apellidos,
+    tipodocumento: this.tipodocumento,
+    identificacion: this.identificacion,
+    email: this.email,
+    fechareserva: this.fechareserva,
+    tiporeserva: this.tiporeserva,
+    cantidadpersonas: this.cantidadpersonas,
+    observaciones: this.observaciones,
+    estado: 'Pendiente'
+  };
+
+    // Realiza la solicitud POST al backend
+    axios.post('http://localhost:3000/api/reservaciones', formData)
+    .then(response => {
+      alert('Reserva guardada con éxito');
+      // Redirecciona a la página de inicio
+      this.$router.push('/home');
+    })
+    .catch(error => {
+      console.error('Error al guardar la reserva:', error);
+    });
+}
   }
 };
 </script>
