@@ -123,6 +123,7 @@ app.post('/api/login', async (req, res) => {
 
     if (result.rows.length === 0) {
       return res.status(401).json({ message: 'Correo electrónico o contraseña incorrectos' });
+      alert('Correo electrónico o contraseña incorrectos');
     }
 
     // Compara la contraseña ingresada con la contraseña almacenada en la base de datos
@@ -131,17 +132,25 @@ app.post('/api/login', async (req, res) => {
     const match = await bcrypt.compare(password, user.password);
 
     if (!match) {
-      return res.status(401).json({ message: 'Contraseña incorrectos' });
+      return res.status(401).json({ message: 'Correo electrónico o contraseña incorrectos' });
+      alert('Correo electrónico o contraseña incorrectos');
     }
 
-    // Genera un token de sesión o realiza otras acciones según tus necesidades
-    const token = 'tu_token_de_sesion';
+    //crea un token jwt
+
+    const payload = { user: { id: user.id, name: user.name, email: user.email, rol: user.rol } };
+
+    const key = 'secret';
+
+    const token = jwt.sign(payload, key, { expiresIn: '1h' });
 
     // Devuelve el token en la respuesta
     return res.status(200).json({ token });
+    alert('Inicio de sesión exitoso');
 
   } catch (error) {
     console.error('Error al iniciar sesión:', error);
+    alert('Error al iniciar sesión');
     return res.status(500).json({ message: 'Error al iniciar sesión', error });
   }
 });

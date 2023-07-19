@@ -22,6 +22,8 @@
 import axios from 'axios';
 
 export default {
+
+  name: 'LoginForm',
   data() {
     return {
       email: '',
@@ -29,20 +31,14 @@ export default {
     };
   },
   methods: {
-    login() {
-  axios.post('http://localhost:3000/api/login', {
+    async login() {
+    const response = await axios.post('http://localhost:3000/api/login', {
     email: this.email,
     password: this.password
   })
-  .then(response => {
-    // Aquí puedes realizar acciones adicionales, como guardar el token en el almacenamiento local
-    console.log('Inicio de sesión exitoso');
-    // Redirigir al usuario a otra página
+
+    localStorage.setItem('token', response.data.token);
     this.$router.push('/admin');
-  })
-  .catch(error => {
-    console.error('Error al iniciar sesión:', error.response.data.message);
-  });
 }
   }
 };
